@@ -1,4 +1,4 @@
-module Agent (Agent(..)) where
+module Agent (Agent(..), QOAgent(..)) where
 
 import System.Random
 import Control.Applicative
@@ -12,19 +12,25 @@ data Offer o => Agent o = Agent {
     offerUtility :: o -> Time -> Double
     }
 
+data Offer o => QOAgent o = QOAgent {
+    self :: Agent o,
+    adversary :: Agent o,
+    possibleAdversaries :: [Agent o]
+    }
+
 -- Agent negotiation strategy.
-instance Negotiator Agent where
+instance Negotiator QOAgent where
     genOffer = qo
     decide = agentDecide
+    update = undefined
 
 -- Qualitative offer
-qo :: Offer o => Negotiation Agent o -> o
-qo (Negotiation _ _ t a b) = maximumBy cmp $ subSet
+qo :: Offer o => QOAgent o -> Negotiation o -> IO o
+qo (QOAgent a b _) (Negotiation _ _ t) = return $ maximumBy cmp $ subSet
     where
     set = offerSet
     clusterSize = let 
-        f = 5
-        s = floor $ 100/f
+        s = floor $ 100 / setPercentage
         in if s == 0 then 1 else s
     subSet = takePosDivBy clusterSize set
     cmp = curry $ uncurry compare . (minO *** minO)
@@ -42,13 +48,18 @@ qo (Negotiation _ _ t a b) = maximumBy cmp $ subSet
     beta o = (luA o + luB o) * uB o t
     minO = uncurry min . (alpha &&& beta)
 
+-- fraction of the total offer set to include in search
+setPercentage :: Double
+setPercentage  = 5
+
 -- Decision strategy - incomplete
-agentDecide :: (Offer o, RandomGen g) => g -> Negotiation Agent o -> Decision o
-agentDecide gen ng@(Negotiation o_opp _ t a b) 
-    | uA o_opp >= uA o_q = Accept
-    | otherwise = Propose o_q
+agentDecide :: Offer o => QOAgent o -> Negotiation o -> IO (Decision o)
+agentDecide ag@(QOAgent a b _) ng@(Negotiation o_opp _ t) = do
+    o_q <- qo ag ng
+    if uA o_opp >= uA o_q
+        then return Accept
+        else return $ Propose o_q
     where
-    o_q = qo ng
 
     uA = flip (offerUtility a) t
     uB = flip (offerUtility b) t

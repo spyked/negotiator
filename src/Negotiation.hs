@@ -6,7 +6,7 @@ import System.Random
 {-
     Offer type class definition.
 -}
-class Eq o => Offer o where
+class (Read o, Show o, Eq o) => Offer o where
     offerSet :: [o]
 
     -- generic implementations
@@ -31,8 +31,9 @@ class Eq o => Offer o where
     to be a Negotiator.
 -}
 class Negotiator a where
-    genOffer :: Offer o => Negotiation a o -> o
-    decide :: (Offer o, RandomGen g) => g -> Negotiation a o -> Decision o
+    genOffer :: Offer o => a o -> Negotiation o -> IO o
+    decide :: Offer o => a o -> Negotiation o -> IO (Decision o)
+    update :: Offer o => a o -> Negotiation o -> IO (a o)
 
 {-
     Type definitions.
@@ -40,12 +41,12 @@ class Negotiator a where
 type Time = Int
 
 -- The variables defining a negotiation.
-data (Negotiator a, Offer o) => Negotiation a o = Negotiation {
+-- TODO: add status quo offer
+-- negOffer should be replaced by last decision
+data Offer o => Negotiation o = Negotiation {
     negOffer :: o,
     negNumber :: Int,
-    negTime :: Time,
-    negAgentA :: a o,
-    negAgentB :: a o
+    negTime :: Time
     }
 
 -- Any decision that a Negotiator can make at a given moment.
@@ -54,5 +55,5 @@ data Offer o => Decision o =
     | Propose o
     | EndSession
     | OptOut
-    deriving Show
+    deriving (Show, Read)
 
