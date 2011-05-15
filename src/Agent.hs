@@ -8,13 +8,12 @@ import Negotiation
 
 -- Simple description of an Agent
 data Offer o => Agent o = Agent {
-    offerRank :: o -> Double,
     offerUtility :: o -> Time -> Double
     }
 
 data Offer o => QOAgent o = QOAgent {
     self :: Agent o,
-    adversary :: Agent o,
+    opponent :: Agent o,
     possibleAdversaries :: [Agent o]
     }
 
@@ -26,23 +25,25 @@ instance Negotiator QOAgent where
 
 -- Qualitative offer
 qo :: Offer o => QOAgent o -> Negotiation o -> IO o
-qo (QOAgent a b _) (Negotiation _ _ t) = return $ maximumBy cmp $ subSet
+qo (QOAgent a b _) neg = return $ maximumBy cmp $ subSet
     where
+    t = negTime neg
     set = offerSet
     clusterSize = let 
         s = floor $ 100 / setPercentage
         in if s == 0 then 1 else s
     subSet = takePosDivBy clusterSize set
+
     cmp = curry $ uncurry compare . (minO *** minO)
 
     uA = offerUtility a
     uB = offerUtility b
 
-    sumA = sum $ map (flip uA $ t) subSet
-    sumB = sum $ map (flip uB $ t) subSet
+    sumA = sum $ map (flip uA $ 0) subSet
+    sumB = sum $ map (flip uB $ 0) subSet
 
-    luA o = uA o t / sumA
-    luB o = uB o t / sumB
+    luA o = uA o 0 / sumA
+    luB o = uB o 0 / sumB
 
     alpha o = uA o t
     beta o = (luA o + luB o) * uB o t
@@ -50,17 +51,23 @@ qo (QOAgent a b _) (Negotiation _ _ t) = return $ maximumBy cmp $ subSet
 
 -- fraction of the total offer set to include in search
 setPercentage :: Double
-setPercentage  = 5
+setPercentage = 10
 
 -- Decision strategy - incomplete
 agentDecide :: Offer o => QOAgent o -> Negotiation o -> IO (Decision o)
-agentDecide ag@(QOAgent a b _) ng@(Negotiation o_opp _ t) = do
-    o_q <- qo ag ng
+agentDecide ag@(QOAgent a b _) neg 
+    | negDecision neg == Accept = return Accept
+    | negDecision neg == OptOut = return OptOut
+    | otherwise = do
+    let o_opp = case negDecision neg of
+            Propose o -> o
+            _ -> negSQO neg
+    o_q <- qo ag neg
     if uA o_opp >= uA o_q
         then return Accept
         else return $ Propose o_q
     where
-
+    t = negTime neg
     uA = flip (offerUtility a) t
     uB = flip (offerUtility b) t
 

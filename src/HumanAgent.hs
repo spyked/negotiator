@@ -14,9 +14,13 @@ readOffer :: Offer o => HumanAgent o -> Negotiation o -> IO o
 readOffer _ _ = getLine >>= return . read
 
 readDecision :: Offer o => HumanAgent o -> Negotiation o -> IO (Decision o)
-readDecision _ (Negotiation o no t) = do
+readDecision _ neg = do
     putStrLn $ "t = " ++ show t ++ ", offer count = " ++ show no
+    putStrLn $ "Opponent's decision was: " ++ show (negDecision neg)
     putStr "Your decision is: "
     hFlush stdout
     str <- getLine
     return $ read str
+    where
+    no = negNumber neg
+    t = negTime neg
