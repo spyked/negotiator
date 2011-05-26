@@ -9,7 +9,15 @@ import Control.Monad.State
 -}
 class (Read o, Show o, Eq o) => Offer o where
     offerSet :: [o]
-    
+
+rankOfferBy :: Offer o => (o -> o -> Ordering) -> o -> [o] -> Double
+rankOfferBy cmp o set = ind / card
+    where
+    sortedSet = sortBy cmp set
+    ind = fromIntegral . (+ 1) . maybe err id $ elemIndex o sortedSet
+    card = fromIntegral $ length set
+    err = error "Offer not in set."
+   
 {-
     Negotiator agent type class definition.
 

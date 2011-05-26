@@ -6,16 +6,19 @@ import Control.Arrow
 import Data.List
 import Negotiator.Negotiation
 
--- Simple description of an Agent
+-- Simple model of an Agent
 data Offer o => Agent o = Agent {
-    offerUtility :: o -> Time -> Double
+    offerUtility :: o -> Time -> Double,
+    offerRank :: o -> [o] -> Double
     }
 
+-- QOAgent: the actual Negotiator
 data Offer o => QOAgent o = QOAgent {
     offerSubSet :: [o],
+    utilityThresh :: Double,
     self :: Agent o,
     opponent :: Agent o,
-    possibleAdversaries :: [Agent o]
+    possibleAdversaries :: [(Agent o, Double)] -- (agent, utility)
     }
 
 -- Agent negotiation strategy.
@@ -26,7 +29,7 @@ instance Negotiator QOAgent where
 
 -- Qualitative offer
 qo :: Offer o => QOAgent o -> Negotiation o -> IO o
-qo (QOAgent subSet a b _) neg = return $ maximumBy cmp $ subSet
+qo (QOAgent subSet _ a b _) neg = return $ maximumBy cmp $ subSet
     where
     t = negTime neg
     cmp = curry $ uncurry compare . (minO *** minO)
@@ -50,19 +53,30 @@ setPercentage = 10
 
 -- Decision strategy - incomplete
 agentDecide :: Offer o => QOAgent o -> Negotiation o -> IO (Decision o)
-agentDecide ag@(QOAgent _ a b _) neg 
+agentDecide ag@(QOAgent subSet thresh a b _) neg 
     | negDecision neg == Accept = return Accept
     | negDecision neg == OptOut = return OptOut
     | otherwise = do
-    let o_opp = case negDecision neg of
-            Propose o -> o
-            _ -> negSQO neg
     o_q <- qo ag neg
-    if uA o_opp >= uA o_q
-        then return Accept
-        else return $ Propose o_q
+
+    doDecide o_q
     where
     t = negTime neg
+    o_opp = case negDecision neg of
+            Propose o -> o
+            _ -> negSQO neg
+
     uA = flip (offerUtility a) t
     uB = flip (offerUtility b) t
+    rB = flip (offerRank b) $ subSet `union` [o_opp]
+
+    doDecide o_q
+        | uA o_opp >= uA o_q = return Accept
+        | abs (uB o_opp - uB o_q) <= thresh = return $ Propose o_q
+        | otherwise = do -- speculate
+        p <- randomRIO (0,1)
+        let r = rB o_opp
+        putStrLn $ "rank iz: " ++ show r
+        return $ if p <= r then Accept else Propose o_q
+
 

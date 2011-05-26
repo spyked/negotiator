@@ -40,10 +40,16 @@ exampleUtility2 o t = 10 +
     values = map fromIntegral $ [apples, pears, carrots] <*> pure o
     weights = zipWith (/) [1.2,1.2,1.2] [-20,-50,-60]
 
+exampleRank :: (ExampleOffer -> Time -> Double) ->
+                ExampleOffer -> [ExampleOffer] -> Double
+exampleRank util = rankOfferBy cmp
+    where
+    cmp o1 o2 = compare (util o1 0) (util o2 0)
+
 exampleAgent :: QOAgent ExampleOffer
-exampleAgent = QOAgent subset
-                       (Agent exampleUtility)
-                       (Agent exampleUtility2)
+exampleAgent = QOAgent subset 1
+                       (Agent exampleUtility (exampleRank exampleUtility))
+                       (Agent exampleUtility2 (exampleRank exampleUtility2))
                        []
     where
     clusterSize = let 
