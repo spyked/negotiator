@@ -10,8 +10,8 @@ and possibly with other automated agents.
 
 The project was created as an application for the Bachelor's Thesis by
 Lucian Mogoșanu, and is primarily based upon Sarit Kraus's paper
-`An Automated Agent for Bilateral Negotiation with Bounded Rational 
-Agents with Incomplete Information`_.
+"*An Automated Agent for Bilateral Negotiation with Bounded Rational 
+Agents with Incomplete Information*" `[1]`_.
 
 B. Project Dependencies
 .......................
@@ -24,6 +24,5 @@ module of the application:
 
 C.References
 ............
-_`An Automated Agent for Bilateral Negotiation with Bounded Rational 
-Agents with Incomplete Information`: http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.73.9461&rep=rep1&type=pdf
+_`[1]`: http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.73.9461&rep=rep1&type=pdf
 
