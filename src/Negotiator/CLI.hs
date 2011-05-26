@@ -1,8 +1,8 @@
-module CLI where
+module Negotiator.CLI where
 
-import HumanAgent
-import ExampleAgent
-import Negotiation
+import Negotiator.HumanAgent
+import Negotiator.ExampleAgent
+import Negotiator.Negotiation
 import Control.Monad.State
 
 

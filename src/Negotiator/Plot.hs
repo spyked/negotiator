@@ -1,4 +1,4 @@
-module Plot where
+module Negotiator.Plot where
 
 cleanFile :: FilePath -> IO ()
 cleanFile path = writeFile path ""

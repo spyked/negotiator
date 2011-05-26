@@ -1,7 +1,7 @@
-module HumanAgent (HumanAgent(..)) where
+module Negotiator.HumanAgent (HumanAgent(..)) where
 
 import System.IO (hFlush, stdout)
-import Negotiation
+import Negotiator.Negotiation
 
 data Offer o => HumanAgent o = HumanAgent
 

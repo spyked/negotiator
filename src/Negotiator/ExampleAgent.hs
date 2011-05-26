@@ -1,9 +1,10 @@
-module ExampleAgent where
+module Negotiator.ExampleAgent where
 
 import Control.Applicative
-import Negotiation
-import Agent
-import Plot
+import Negotiator.Negotiation
+import Negotiator.Util
+import Negotiator.Agent
+import Negotiator.Plot
 
 -- Simple example scenario - doesn't really do anything
 data ExampleOffer = ExampleOffer {
@@ -40,9 +41,19 @@ exampleUtility2 o t = 10 +
     weights = zipWith (/) [1.2,1.2,1.2] [-20,-50,-60]
 
 exampleAgent :: QOAgent ExampleOffer
-exampleAgent = QOAgent (Agent exampleUtility)
+exampleAgent = QOAgent subset
+                       (Agent exampleUtility)
                        (Agent exampleUtility2)
                        []
+    where
+    clusterSize = let 
+        s = floor $ 100 / setPercentage
+        in if s == 0 then 1 else s
+    subset = takePosDivBy clusterSize offerSet
+
+-- fraction of the total offer set to include in search
+setPercentage :: Double
+setPercentage = 10
 
 plot :: IO ()
 plot = cleanFile "plot.txt"

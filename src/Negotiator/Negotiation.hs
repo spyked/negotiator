@@ -1,4 +1,4 @@
-module Negotiation where
+module Negotiator.Negotiation where
 
 import Data.List
 import System.Random
