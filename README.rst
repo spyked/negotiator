@@ -19,7 +19,7 @@ B. Project Dependencies
 The following represent Haskell dependencies for every top-level
 module of the application:
 
-* *Negotiator*: Control.State.Monad, available via the Ubuntu/Debian
+* *Negotiator*: Control.Monad.State, available via the Ubuntu/Debian
   package libghc6-mtl-dev.
 
 C.References
