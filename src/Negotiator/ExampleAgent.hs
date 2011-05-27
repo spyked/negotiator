@@ -55,9 +55,9 @@ exampleLuce util o subSet = trace "bla" $ util o 0 / sumUtils
 
 exampleAgent :: QOAgent ExampleOffer
 exampleAgent = QOAgent subset 1
-                       (Agent exampleUtility 
+                       (Agent "me" exampleUtility 
                               (exampleRank exampleUtility))
-                       (Agent exampleUtility2 
+                       (Agent "him" exampleUtility2 
                               (exampleRank exampleUtility2))
                        []
     where

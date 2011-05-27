@@ -8,9 +8,13 @@ import Negotiator.Negotiation
 
 -- Simple model of an Agent
 data Offer o => Agent o = Agent {
+    agentID :: String,
     offerUtility :: o -> Time -> Double,
     offerRank :: o -> [o] -> Double
     }
+
+instance Offer o => Show (Agent o) where
+    show = agentID
 
 -- QOAgent: the actual Negotiator
 data Offer o => QOAgent o = QOAgent {
