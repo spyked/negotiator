@@ -25,7 +25,7 @@ data Offer o => QOAgent o = QOAgent {
 instance Negotiator QOAgent where
     genOffer = qo
     decide = agentDecide
-    update = undefined
+    update = agentUpdate
 
 -- Qualitative offer
 qo :: Offer o => QOAgent o -> Negotiation o -> IO o
@@ -68,6 +68,7 @@ agentDecide ag@(QOAgent subSet thresh a b _) neg
 
     uA = flip (offerUtility a) t
     uB = flip (offerUtility b) t
+    rA = flip (offerRank a) $ subSet `union` [o_opp]
     rB = flip (offerRank b) $ subSet `union` [o_opp]
 
     doDecide o_q
@@ -75,8 +76,27 @@ agentDecide ag@(QOAgent subSet thresh a b _) neg
         | abs (uB o_opp - uB o_q) <= thresh = return $ Propose o_q
         | otherwise = do -- speculate
         p <- randomRIO (0,1)
-        let r = rB o_opp
+        let r = (rA o_opp + rB o_opp) * 0.5
         putStrLn $ "rank iz: " ++ show r
         return $ if p <= r then Accept else Propose o_q
 
+luce :: Offer o => o -> [o] -> Agent o -> Double
+luce o subSet a = uA o 0 / sumA
+    where
+    uA = offerUtility a
+    sumA = sum $ map (flip uA $ 0) subSet
+
+agentUpdate :: Offer o => QOAgent o -> Negotiation o -> IO (QOAgent o)
+agentUpdate (QOAgent subSet thr a b ags) neg = return $
+    QOAgent subSet thr a b' ags'
+    where
+    o = case negDecision neg of
+        Propose off -> off
+        _ -> negSQO neg
+    lus = map (luce o subSet . fst) ags -- p(offer | type)
+    po = sum $ zipWith (*) lus $ map snd ags  -- p(offer)
+
+    bayesUpdate ((ag,pt),pot) = (ag,pot * pt / po)
+    ags' = map bayesUpdate $ zip ags lus
+    b' = fst $ maximumBy (\ (_, p1) (_, p2) -> compare p1 p2) ags'
 

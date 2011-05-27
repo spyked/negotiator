@@ -1,6 +1,7 @@
 module Negotiator.ExampleAgent where
 
 import Control.Applicative
+import Debug.Trace (trace)
 import Negotiator.Negotiation
 import Negotiator.Util
 import Negotiator.Agent
@@ -46,10 +47,18 @@ exampleRank util = rankOfferBy cmp
     where
     cmp o1 o2 = compare (util o1 0) (util o2 0)
 
+exampleLuce :: (ExampleOffer -> Time -> Double) ->
+                ExampleOffer -> [ExampleOffer] -> Double
+exampleLuce util o subSet = trace "bla" $ util o 0 / sumUtils
+    where
+    sumUtils = sum $ map (flip util $ 0) subSet
+
 exampleAgent :: QOAgent ExampleOffer
 exampleAgent = QOAgent subset 1
-                       (Agent exampleUtility (exampleRank exampleUtility))
-                       (Agent exampleUtility2 (exampleRank exampleUtility2))
+                       (Agent exampleUtility 
+                              (exampleRank exampleUtility))
+                       (Agent exampleUtility2 
+                              (exampleRank exampleUtility2))
                        []
     where
     clusterSize = let 

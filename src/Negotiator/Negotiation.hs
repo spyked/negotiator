@@ -27,7 +27,7 @@ rankOfferBy cmp o set = ind / card
 class Negotiator a where
     genOffer :: Offer o => a o -> Negotiation o -> IO o
     decide :: Offer o => a o -> Negotiation o -> IO (Decision o)
-    update :: Offer o => a o -> o -> IO (a o)
+    update :: Offer o => a o -> Negotiation o -> IO (a o)
 
 {-
     Type definitions.
@@ -35,8 +35,6 @@ class Negotiator a where
 type Time = Int
 
 -- The variables defining a negotiation.
--- TODO: add status quo offer
--- negOffer should be replaced by last decision
 data Offer o => Negotiation o = Negotiation {
     negDecision :: Decision o,
     negSQO :: o,
