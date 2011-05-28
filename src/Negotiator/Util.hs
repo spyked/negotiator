@@ -1,5 +1,10 @@
 module Negotiator.Util where
 
+import Data.List (foldl')
+
+sum' :: Num a => [a] -> a
+sum' = foldl' (+) 0
+
 takePosDivBy :: Int -> [a] -> [a]
 takePosDivBy = takePosDivides' 0
     where

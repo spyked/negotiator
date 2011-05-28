@@ -1,7 +1,6 @@
 module Negotiator.SiAgent (SiOffer(..), mkSiAgent) where
 
 import Control.Applicative ((<*>), pure)
-import Data.List (foldl')
 import Negotiator.Negotiation
 import Negotiator.Agent
 import Negotiator.Util
@@ -44,25 +43,11 @@ instance Offer SiOffer where
 limits :: [Int]
 limits = [16,14,25,15,6]
 
-limFracs :: [Double]
-limFracs = [1/16,1/14,1/25,1/15,1/6]
-
-myWeights :: [Double]
-myWeights = [2/16,2/14,2/25,2/15,2/6]
-
-v5myWeights = v5fromList myWeights
-
-funcs :: [SiOffer -> Int]
-funcs = [siCpu, siRam, siInterconnect, siDsp, siSensor]
-
 maxU :: Double
 maxU = 10
 
 qoThreshold :: Double
 qoThreshold = 1
-
-sum' :: Num a => [a] -> a
-sum' = foldl' (+) 0
 
 offerToV5 :: SiOffer -> Vector5
 offerToV5 (SiOffer c r i d s) = Vector5 (
@@ -72,22 +57,18 @@ offerToV5 (SiOffer c r i d s) = Vector5 (
 myU :: UtilityFunc
 myU o t = v5dotp v5myWeights v5vals + 2 * (fromIntegral t)
     where
-    values = map fromIntegral $ funcs <*> pure o
+    v5myWeights = v5fromList [2/16,2/14,2/25,2/15,2/6]
     v5vals = offerToV5 o
 
 oppU :: Double -> [Double] -> UtilityFunc
 oppU discount interest o t = maxU - 
     sum' (zipWith (*) weights values) - discount * (fromIntegral t)
     where
-    weights = zipWith (*) interest limFracs
-    values = map fromIntegral $ funcs <*> pure o
+    weights = zipWith (*) interest [1/16,1/14,1/25,1/15,1/6]
+    values = map fromIntegral $ 
+        [siCpu, siRam, siInterconnect, siDsp, siSensor] <*> pure o
 
 oppU1 :: UtilityFunc
---oppU1 o t = sum' (zipWith (*) weights values) - 
---    1 * (fromIntegral t)
---    where
---    weights = [0.6 / 16,0.6 / 14,0.6 / 25,0.6 / 15,0.6 / 6]
---    values = map fromIntegral $ funcs <*> pure o
 oppU1 o t = maxU - v5dotp weights values - 1 * (fromIntegral t)
     where
     weights = Vector5 (0.6 / 16,0.6 / 14,0.6 / 25,0.6 / 15,0.6 / 6)
@@ -133,6 +114,7 @@ mkSiAgent =
     numModels = length rawAgentTypes
     agentIDs = map (\ n -> "agent" ++ show n) [0 .. numModels - 1]
     agentModels = zipWith mkAgentModel rawAgentTypes agentIDs
+
     p = 1 / fromIntegral numModels
     agentPs = zip agentModels $ take numModels $ iterate id p
 
@@ -144,3 +126,4 @@ mkSiAgent =
 -- fraction of the total offer set to include in search
 setPercentage :: Double
 setPercentage = 10
+
