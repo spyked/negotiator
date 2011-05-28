@@ -1,7 +1,7 @@
 module Negotiator.CLI where
 
 import Negotiator.HumanAgent
-import Negotiator.ExampleAgent
+import Negotiator.SiAgent
 import Negotiator.Negotiation
 import Control.Monad.State
 
@@ -10,9 +10,9 @@ import Control.Monad.State
     A commandline interface for negotiation.
 -}
 
-initNegotiation :: Negotiation ExampleOffer
+initNegotiation :: Negotiation SiOffer
 initNegotiation = Negotiation
-    Initiate (ExampleOffer 20 50 60) 0 0 2 5
+    Initiate (SiOffer 16 14 25 15 6) 0 0 2 5
 
 cliNegotiation = runStateT negotiation 
-    (initNegotiation, HumanAgent, exampleAgent) >>= return . fst
+    (initNegotiation, HumanAgent, mkSiAgent) >>= return . fst

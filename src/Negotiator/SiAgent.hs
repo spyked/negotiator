@@ -1,6 +1,7 @@
 module Negotiator.SiAgent (SiOffer(..), mkSiAgent) where
 
 import Control.Applicative ((<*>), pure)
+import Data.List (foldl')
 import Negotiator.Negotiation
 import Negotiator.Agent
 import Negotiator.Util
@@ -43,6 +44,14 @@ instance Offer SiOffer where
 limits :: [Int]
 limits = [16,14,25,15,6]
 
+limFracs :: [Double]
+limFracs = [1/16,1/14,1/25,1/15,1/6]
+
+myWeights :: [Double]
+myWeights = [2/16,2/14,2/25,2/15,2/6]
+
+v5myWeights = v5fromList myWeights
+
 funcs :: [SiOffer -> Int]
 funcs = [siCpu, siRam, siInterconnect, siDsp, siSensor]
 
@@ -52,35 +61,67 @@ maxU = 10
 qoThreshold :: Double
 qoThreshold = 1
 
+sum' :: Num a => [a] -> a
+sum' = foldl' (+) 0
+
+offerToV5 :: SiOffer -> Vector5
+offerToV5 (SiOffer c r i d s) = Vector5 (
+    fromIntegral c, fromIntegral r, fromIntegral i, fromIntegral d,
+    fromIntegral s)
+
 myU :: UtilityFunc
-myU o t = sum (zipWith (*) weights values) + 2 * (fromIntegral t)
+myU o t = v5dotp v5myWeights v5vals + 2 * (fromIntegral t)
     where
-    weights = zipWith (/) [2,2,2,2,2] $ map fromIntegral limits
     values = map fromIntegral $ funcs <*> pure o
+    v5vals = offerToV5 o
 
 oppU :: Double -> [Double] -> UtilityFunc
-oppU discount interest o t = 
-    maxU - sum (zipWith (*) weights values) - discount * (fromIntegral t)
+oppU discount interest o t = maxU - 
+    sum' (zipWith (*) weights values) - discount * (fromIntegral t)
     where
-    weights = zipWith (/) interest $ map fromIntegral limits
+    weights = zipWith (*) interest limFracs
     values = map fromIntegral $ funcs <*> pure o
+
+oppU1 :: UtilityFunc
+--oppU1 o t = sum' (zipWith (*) weights values) - 
+--    1 * (fromIntegral t)
+--    where
+--    weights = [0.6 / 16,0.6 / 14,0.6 / 25,0.6 / 15,0.6 / 6]
+--    values = map fromIntegral $ funcs <*> pure o
+oppU1 o t = maxU - v5dotp weights values - 1 * (fromIntegral t)
+    where
+    weights = Vector5 (0.6 / 16,0.6 / 14,0.6 / 25,0.6 / 15,0.6 / 6)
+    values = offerToV5 o
+
+oppU2 :: UtilityFunc
+oppU2 o t = maxU - v5dotp weights values - 0.8 * (fromIntegral t)
+    where
+    weights = Vector5 (0.1 / 16,0.5 / 14,0.4 / 25,1.0 / 15,1.0 / 6)
+    values = offerToV5 o
+
+oppU3 :: UtilityFunc
+oppU3 o t = maxU - v5dotp weights values - 1 * (fromIntegral t)
+    where
+    weights = Vector5 (1.2 / 16,1.1 / 14,0.4 / 25,0.2 / 15,0.1 / 6)
+    values = offerToV5 o
 
 genericRank :: UtilityFunc -> SiOffer -> [SiOffer] -> Double
 genericRank util = rankOfferBy cmp
     where
     cmp o1 o2 = compare (util o1 0) (util o2 0)
 
-rawAgentTypes :: [(Double, [Double])]
+rawAgentTypes :: [UtilityFunc]
 rawAgentTypes = [
-    (1, [0.6,0.6,0.6,0.6,0.6]),
-    (0.8, [0.1,0.5,0.4,1.0,1.0]),
-    (1, [1.2,1.1,0.4,0.2,0.1])
+--    oppU 1 [0.6,0.6,0.6,0.6,0.6],
+--    oppU 0.8 [0.1,0.5,0.4,1.0,1.0],
+--    oppU 1 [1.2,1.1,0.4,0.2,0.1]
+    oppU1,
+    oppU2,
+    oppU3
     ]
 
-mkAgentModel :: (Double, [Double]) -> String -> Agent SiOffer
-mkAgentModel raw id = Agent id util $ genericRank util
-    where
-    util = uncurry oppU $ raw
+mkAgentModel :: UtilityFunc -> String -> Agent SiOffer
+mkAgentModel util id = Agent id util $ genericRank util
 
 siMe :: Agent SiOffer
 siMe = Agent "me" myU $ genericRank myU
@@ -91,7 +132,7 @@ mkSiAgent =
     where
     numModels = length rawAgentTypes
     agentIDs = map (\ n -> "agent" ++ show n) [0 .. numModels - 1]
-    agentModels = map (uncurry mkAgentModel) $ zip rawAgentTypes agentIDs
+    agentModels = zipWith mkAgentModel rawAgentTypes agentIDs
     p = 1 / fromIntegral numModels
     agentPs = zip agentModels $ take numModels $ iterate id p
 

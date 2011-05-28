@@ -1,5 +1,6 @@
 module Negotiator.Agent (Agent(..), QOAgent(..)) where
 
+import Debug.Trace
 import System.Random
 import Control.Applicative
 import Control.Arrow
@@ -41,8 +42,8 @@ qo (QOAgent subSet _ a b _) neg = return $ maximumBy cmp $ subSet
     uA = offerUtility a
     uB = offerUtility b
 
-    sumA = sum $ map (flip uA $ 0) subSet
-    sumB = sum $ map (flip uB $ 0) subSet
+    sumA = foldl' (+) 0 $ map (flip uA $ 0) subSet
+    sumB = foldl' (+) 0 $ map (flip uB $ 0) subSet
 
     luA o = uA o 0 / sumA
     luB o = uB o 0 / sumB
