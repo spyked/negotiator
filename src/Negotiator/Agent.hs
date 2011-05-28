@@ -92,8 +92,9 @@ luce o subSet a = uA o 0 / sumA
     sumA = sum $ map (flip uA $ 0) subSet
 
 agentUpdate :: Offer o => QOAgent o -> Negotiation o -> IO (QOAgent o)
-agentUpdate (QOAgent subSet thr a b ags) neg = return $
-    QOAgent subSet thr a b' ags'
+agentUpdate (QOAgent subSet thr a b ags) neg = do
+    putStrLn $ "Believed type: " ++ show b'
+    return $ QOAgent subSet thr a b' ags'
     where
     o = case negDecision neg of
         Propose off -> off

@@ -69,7 +69,7 @@ oppU discount interest o t = maxU -
         [siCpu, siRam, siInterconnect, siDsp, siSensor] <*> pure o
 
 oppU1 :: UtilityFunc
-oppU1 o t = maxU - v5dotp weights values - 1 * (fromIntegral t)
+oppU1 o t = maxU - v5dotp weights values - 2 * (fromIntegral t)
     where
     weights = Vector5 (0.6 / 16,0.6 / 14,0.6 / 25,0.6 / 15,0.6 / 6)
     values = offerToV5 o
@@ -81,7 +81,7 @@ oppU2 o t = maxU - v5dotp weights values - 0.8 * (fromIntegral t)
     values = offerToV5 o
 
 oppU3 :: UtilityFunc
-oppU3 o t = maxU - v5dotp weights values - 1 * (fromIntegral t)
+oppU3 o t = maxU - v5dotp weights values - 0.5 * (fromIntegral t)
     where
     weights = Vector5 (1.2 / 16,1.1 / 14,0.4 / 25,0.2 / 15,0.1 / 6)
     values = offerToV5 o
