@@ -5,7 +5,6 @@ import Negotiator.SiAgent
 import Negotiator.Negotiation
 import Control.Monad.State
 
-
 {- 
     A commandline interface for negotiation.
 -}

@@ -105,4 +105,4 @@ agentUpdate (QOAgent subSet thr a b ags) neg = do
     bayesUpdate ((ag,pt),pot) = (ag,pot * pt / po)
     ags' = map bayesUpdate $ zip ags lus
     b' = fst $ maximumBy (\ (_, p1) (_, p2) -> compare p1 p2) ags'
-
+ 
