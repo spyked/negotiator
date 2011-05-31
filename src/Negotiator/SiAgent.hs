@@ -11,7 +11,7 @@ data SiOffer = SiOffer {
     siInterconnect :: Int,
     siDsp :: Int,
     siSensor :: Int
-    } deriving (Show, Eq, Ord)
+    } deriving (Eq, Ord)
 
 type UtilityFunc = SiOffer -> Time -> Double
 
@@ -26,6 +26,10 @@ instance Read SiOffer where
         i = l !! 2
         d = l !! 3
         s = l !! 4
+
+instance Show SiOffer where
+    show (SiOffer c r i d s) = 
+        init . foldl (++) "" $ map ((++ " ") . show) [c,r,i,d,s]
 
 instance Offer SiOffer where
     offerSet = [SiOffer c r i d s | 
