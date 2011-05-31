@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+	<title>SiAgent</title>
+	<head>
+	<style>
+		#butpar { color : black; margin: 0px; cursor: pointer; }
+		#butpar.hover { text-decoration: underline; }
+	</style>
+
+	<script 
+	src="http://ajax.googleapis.com/ajax/libs/jquery/1.5.2/jquery.min.js">
+	</script>
+
+	<script>
+		$(document).ready(function() {
+			$.ajax({
+				url : "name",
+				success : function(msg) {
+					$("#humanname").append(msg);
+				}
+			});
+		});
+	</script>
+
+	</head>
+
+	<body>
+		<h1>SiAgent</h1>
+		<p>Human negotiator: <b id="humanname"></b></p>
+
+		<div id="chatbox">
+			<h4>Decisions:</h4>
+		</div>
+
+		<div id="controls">
+			<p id="butpar">Click me!</p>
+		</div>
+
+	<script>
+	<!-- Shiny stuff -->
+		$("#butpar").click(function() {
+			// nothing yet
+		});
+
+		$("#butpar").hover(function() {
+			$(this).addClass("hover");
+		}, function() {
+			$(this).removeClass("hover");
+		});
+
+	</script>
+	</body>
+</html>
