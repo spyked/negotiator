@@ -21,6 +21,9 @@ module of the application:
 
 * *Negotiator*: Control.Monad.State, available via the Ubuntu/Debian
   package libghc6-mtl-dev.
+* *WebBargain*: happstack, available through cabal
+
+The project is being developed and tested on ghc 6.12.3.
 
 C.References
 ............
