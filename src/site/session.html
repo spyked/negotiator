@@ -7,47 +7,75 @@
 		#butpar.hover { text-decoration: underline; }
 	</style>
 
+	<!-- CSS and scripts go here -->
+	<link rel="stylesheet" type="text/css" href="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8.12/themes/start/jquery-ui.css" /> 
 	<script 
-	src="http://ajax.googleapis.com/ajax/libs/jquery/1.5.2/jquery.min.js">
-	</script>
+	src="http://ajax.googleapis.com/ajax/libs/jquery/1.5.2/jquery.min.js"></script>
+	<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8.12/jquery-ui.js"></script> 
+	<script type="text/javascript" src="ui.spinner.js"></script> 
 
 	<script>
 		$(document).ready(function() {
+			$("#siCpu").spinner({min:0, max:16});
+			$("#siRam").spinner({min:0, max:14});
+			$("#siInterconnect").spinner({min:0, max:25});
+			$("#siDsp").spinner({min:0, max:15});
+			$("#siSensor").spinner({min:0, max:6});
 			$.ajax({
 				url : "name",
 				success : function(msg) {
 					$("#humanname").append(msg);
 				}
 			});
+		$("#propose").click(function() {
+			// nothing yet
+		});
+
 		});
 	</script>
 
 	</head>
 
+	<!-- Session page body -->
 	<body>
 		<h1>SiAgent</h1>
 		<p>Human negotiator: <b id="humanname"></b></p>
 
 		<div id="chatbox">
 			<h4>Decisions:</h4>
+			<table class="grid ui-state-highlight ui-corner-all">
+			<tr><td><b>Human</b>:</td><td>A decision</td></tr>
+			<tr><td><b>Computer</b>:</td><td>Another decision<td></tr>
+			<tr><td><b>Dunno</b>:</td><td>...</td></tr>
+			</table>
 		</div>
 
 		<div id="controls">
-			<p id="butpar">Click me!</p>
+			<h4>Prices:</h4>
+			<table class="grid ui-state-highlight ui-corner-all">
+			<tr>
+				<td>CPU:</td>
+				<td><input type="text" size="4" id="siCpu" value="16"/></td>
+				<td>RAM:</td>
+				<td><input type="text" size="4" id="siRam" value="14" /></td>
+			</tr><tr>
+				<td>Interconnect:</td>
+				<td><input type="text" size="4" id="siInterconnect"
+					value="25"/></td>
+				<td>DSP:</td>
+				<td><input type="text" size="4"  id="siDsp" value="15"/></td>
+			</tr><tr>
+				<td>Sensor:</td>
+				<td><input type="text" size="4" id="siSensor" value="6"/></td>
+			</tr> 
+			</table>
+
+			<p>
+				<input type="button" id="accept" value="Accept" />
+				<input type="button" id="propose" value="Propose" />
+				<input type="button" id="end-round" value="End round" />
+				<input type="button" id="opt-out" value="Opt out" />
+			</p>
 		</div>
-
-	<script>
-	<!-- Shiny stuff -->
-		$("#butpar").click(function() {
-			// nothing yet
-		});
-
-		$("#butpar").hover(function() {
-			$(this).addClass("hover");
-		}, function() {
-			$(this).removeClass("hover");
-		});
-
-	</script>
 	</body>
 </html>
