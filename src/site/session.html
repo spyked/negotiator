@@ -42,7 +42,7 @@
 		<p>Human negotiator: <b id="humanname"></b></p>
 
 		<div id="chatbox">
-			<h4>Decisions:</h4>
+			<h4>History of decisions:</h4>
 			<table class="grid ui-state-highlight ui-corner-all">
 			<tr><td><b>Human</b>:</td><td>A decision</td></tr>
 			<tr><td><b>Computer</b>:</td><td>Another decision<td></tr>
@@ -51,28 +51,39 @@
 		</div>
 
 		<div id="controls">
-			<h4>Prices:</h4>
+			<h4>Offers:</h4>
 			<table class="grid ui-state-highlight ui-corner-all">
 			<tr>
-				<td>CPU:</td>
+				<td>Component</td>
+				<td>Current price</td>
+				<td>Proposed price</td>
+			</tr><tr>
+				<td><b>CPU</b></td>
+				<td><div id="cpuPrice">0</div></td>
 				<td><input type="text" size="4" id="siCpu" value="16"/></td>
-				<td>RAM:</td>
+			</tr><tr>
+				<td><b>RAM</b></td>
+				<td><div id="ramPrice">0</div></td>
 				<td><input type="text" size="4" id="siRam" value="14" /></td>
 			</tr><tr>
-				<td>Interconnect:</td>
+				<td><b>Interconnect</b></td>
+				<td><div id="interconnectPrice">0</div></td>
 				<td><input type="text" size="4" id="siInterconnect"
 					value="25"/></td>
-				<td>DSP:</td>
+			</tr><tr>
+				<td><b>DSP</b></td>
+				<td><div id="dspPrice">0</div></td>
 				<td><input type="text" size="4"  id="siDsp" value="15"/></td>
 			</tr><tr>
-				<td>Sensor:</td>
+				<td><b>Sensor</b></td>
+				<td><div id="sensorPrice">0</div></td>
 				<td><input type="text" size="4" id="siSensor" value="6"/></td>
 			</tr> 
 			</table>
 
 			<p>
-				<input type="button" id="accept" value="Accept" />
-				<input type="button" id="propose" value="Propose" />
+				<input type="button" id="accept" value="Accept current offer" />
+				<input type="button" id="propose" value="Propose offer" />
 				<input type="button" id="end-round" value="End round" />
 				<input type="button" id="opt-out" value="Opt out" />
 			</p>
