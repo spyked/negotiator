@@ -1,4 +1,4 @@
-module Negotiator.Agent (Agent(..), QOAgent(..)) where
+module Negotiator.Agent (Agent(..), QOAgent(..), findAgent) where
 
 import Debug.Trace
 import System.Random
@@ -17,6 +17,9 @@ data Offer o => Agent o = Agent {
 instance Offer o => Show (Agent o) where
     show = agentID
 
+instance Offer o => Eq (Agent o) where
+    ag1 == ag2 = agentID ag1 == agentID ag2
+
 -- QOAgent: the actual Negotiator
 data Offer o => QOAgent o = QOAgent {
     offerSubSet :: [o],
@@ -31,6 +34,14 @@ instance Negotiator QOAgent where
     genOffer = qo
     decide = agentDecide
     update = agentUpdate
+
+-- find an agent after a given id
+findAgent :: Offer o => String -> [Agent o] -> Maybe (Agent o)
+findAgent id ags 
+    | null matchList = Nothing
+    | otherwise = Just $ head matchList
+    where
+    matchList = filter (\ ag -> agentID ag == id) ags
 
 -- Qualitative offer
 qo :: Offer o => QOAgent o -> Negotiation o -> IO o
@@ -51,10 +62,6 @@ qo (QOAgent subSet _ a b _) neg = return $ maximumBy cmp $ subSet
     alpha o = uA o t
     beta o = (luA o + luB o) * uB o t
     minO = uncurry min . (alpha &&& beta)
-
--- fraction of the total offer set to include in search
-setPercentage :: Double
-setPercentage = 10
 
 -- Decision strategy - incomplete
 agentDecide :: Offer o => QOAgent o -> Negotiation o -> IO (Decision o)
