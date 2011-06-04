@@ -41,7 +41,7 @@ data Offer o => Negotiation o = Negotiation {
     negTime :: Time,
     negMaxNumber :: Int,
     negDeadline :: Time
-    }
+    } deriving (Show, Read)
 
 -- Any decision that a Negotiator can make at a given moment.
 data Offer o => Decision o = 
@@ -53,3 +53,4 @@ data Offer o => Decision o =
     deriving (Show, Read, Eq)
 
 data Offer o => Outcome o = Agree o | Disagree deriving Show
+
