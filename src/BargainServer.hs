@@ -18,8 +18,6 @@ loopbackCookie :: ServerPart Response
 loopbackCookie = do
     req <- askRq
     ok . toResponse $ show req
-    --cookie <- lookCookie "sicookie"
-    --ok . toResponse $ show cookie
 
 -- main loop
 main :: IO ()
@@ -27,9 +25,10 @@ main = simpleHTTP nullConf $ msum
     [ 
         dir "session" $ negotiationSession,
         dir "name" $ serveHumanName,
-        dir "cookie" $ loopbackCookie,
-        --dir "offer" $ serveOffer,
-        --dir "messages" $ negotiationProtocol,
+        dir "cookie" $ loopbackCookie, -- for debugging only
+        dir "offer" $ serveOffer,
+        dir "time" $ serveTime,
+        dir "messages" $ negotiationProtocol,
         dir "index" $ serveFile htmlContent (siteDir </> "index.html"),
         nullDir >> serveFile htmlContent (siteDir </> "index.html"),
         spinButtonData,

@@ -1,5 +1,5 @@
 module WebBargain.Negotiation 
-    (negotiationSession, serveOffer, serveHumanName, 
+    (negotiationSession, serveOffer, serveHumanName, serveTime,
     negotiationProtocol) where
 
 import Control.Monad
@@ -11,6 +11,8 @@ import WebBargain.Util
 import Negotiator.Negotiation
 import Negotiator.Agent
 import Negotiator.SiAgent
+
+type SiState = WebState SiOffer
 
 -- initialization parameters
 initialSiAgent :: QOAgent SiOffer
@@ -26,7 +28,7 @@ initialNegotiation = Negotiation {
     negDeadline     = 5
     }
 
-initialState :: WebState SiOffer
+initialState :: SiState
 initialState = WebState {
     wsNegotiation   = initialNegotiation,
     wsOpponentID    = agentID . opponent $ initialSiAgent,
@@ -47,10 +49,9 @@ negotiationSession = msum
            decodeBody postPolicy
            username <- look "username"
            let offer = negSQO initialNegotiation
-           --addCookie Session (mkCookie "username" username)
+           addCookie Session (mkCookie "username" username)
            addCookie Session (mkCookie "offer" $ show offer)
            addCookie Session (mkCookie "state" $ show initialState)
-           --addCookie Session (mkCookie "sicookie" $ show cookie)
            serveSession
            -- if method is POST, create a new session with
            -- the specified data.
@@ -71,6 +72,15 @@ serveOffer = msum
         do offer <- lookCookieValue "offer"
            ok . toResponse $ offer
     ,   do ok $ toResponse "no_offer"
+    ]
+
+-- serve the current negotiation round
+serveTime :: ServerPart Response
+serveTime = msum
+    [
+        do state <- readCookieValue "state" :: ServerPartT IO SiState
+           ok . toResponse . show $ negTime $ wsNegotiation state
+    ,   do ok $ toResponse "-1"
     ]
 
 negotiationProtocol :: ServerPart Response
