@@ -1,6 +1,6 @@
 all: BargainServer
 
-BargainServer: BargainServer.hs
+BargainServer: BargainServer.hs WebBargain/*.hs
 	ghc -o BargainServer $< --make -O2
 
 clean:

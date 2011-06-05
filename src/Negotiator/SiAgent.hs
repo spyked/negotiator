@@ -17,15 +17,12 @@ type UtilityFunc = SiOffer -> Time -> Double
 
 -- type class instances
 instance Read SiOffer where
-    readsPrec _ str = [(SiOffer c r i d s, rest)]
-        where
-        l = map read $ words str
-        rest = concat $ drop 5 $ words str
-        c = l !! 0
-        r = l !! 1
-        i = l !! 2
-        d = l !! 3
-        s = l !! 4
+    readsPrec _ str = [(SiOffer c r i d s, rest) | 
+        (c, r1) <- reads str,
+        (r, r2) <- reads r1,
+        (i, r3) <- reads r2,
+        (d, r4) <- reads r3,
+        (s,rest) <- reads r4]
 
 instance Show SiOffer where
     show (SiOffer c r i d s) = 

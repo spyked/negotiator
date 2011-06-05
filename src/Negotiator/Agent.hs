@@ -1,6 +1,5 @@
 module Negotiator.Agent (Agent(..), QOAgent(..), findAgent) where
 
-import Debug.Trace
 import System.Random
 import Control.Applicative
 import Control.Arrow

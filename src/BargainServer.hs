@@ -7,9 +7,6 @@ import System.FilePath ((</>))
 import WebBargain.Util
 import WebBargain.Negotiation
 
-siteDir :: String
-siteDir = "site"
-
 -- serve spin button data
 spinButtonData :: ServerPart Response
 spinButtonData = msum
@@ -17,21 +14,25 @@ spinButtonData = msum
     dir "ui.spinner.js" $ serveFile jsContent (siteDir </> "ui.spinner.js")
     ]
 
--- serve various resources
-getHumanName :: ServerPart Response
-getHumanName = do
-    name <- lookCookieValue "username"
-    ok $ toResponse name
+loopbackCookie :: ServerPart Response
+loopbackCookie = do
+    req <- askRq
+    ok . toResponse $ show req
+    --cookie <- lookCookie "sicookie"
+    --ok . toResponse $ show cookie
 
 -- main loop
 main :: IO ()
 main = simpleHTTP nullConf $ msum
     [ 
-        dir "session" $ negotiationSession siteDir,
-        dir "name" $ getHumanName,
+        dir "session" $ negotiationSession,
+        dir "name" $ serveHumanName,
+        dir "cookie" $ loopbackCookie,
+        --dir "offer" $ serveOffer,
+        --dir "messages" $ negotiationProtocol,
         dir "index" $ serveFile htmlContent (siteDir </> "index.html"),
         nullDir >> serveFile htmlContent (siteDir </> "index.html"),
         spinButtonData,
-        anyPath $ serveFile htmlContent (siteDir </> "404.html") >>= notFound
+        anyPath $ serve404
     ]
 

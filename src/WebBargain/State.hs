@@ -1,5 +1,6 @@
 module WebBargain.State where
 
+import Debug.Trace
 import Negotiator.Negotiation
 import Negotiator.Agent
 
@@ -7,7 +8,19 @@ data Offer o => WebState o = WebState {
     wsNegotiation :: Negotiation o,
     wsOpponentID :: String,
     wsProbabilities :: [Double]
-    } deriving (Show, Read)
+    }
+
+instance Offer o => Show (WebState o) where
+    show (WebState n o p) = "(" ++ show n ++ "," ++ o ++ "," 
+                         ++ show p ++ ")"
+
+instance Offer o => Read (WebState o) where
+    readsPrec _ = readParen True 
+        (\ inp -> [(WebState n o p, r) | 
+                    (n, ',' : r') <- reads inp,
+                    (o, ',' : r'') <- lex r',
+                    (p, r) <- reads r'' ]
+        )
 
 -- gets a stateful wsQOAgent from the initial one plus a WebState
 wsQOAgent :: Offer o => QOAgent o -> WebState o -> QOAgent o
