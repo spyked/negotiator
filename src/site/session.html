@@ -2,10 +2,6 @@
 <html>
 	<title>SiAgent</title>
 	<head>
-	<style>
-		#butpar { color : black; margin: 0px; cursor: pointer; }
-		#butpar.hover { text-decoration: underline; }
-	</style>
 
 	<!-- CSS and scripts go here -->
 	<link rel="stylesheet" type="text/css" href="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8.12/themes/start/jquery-ui.css" /> 
@@ -21,15 +17,51 @@
 			$("#siInterconnect").spinner({min:0, max:25});
 			$("#siDsp").spinner({min:0, max:15});
 			$("#siSensor").spinner({min:0, max:6});
+            prices = new Array($("#cpuPrice"), $("#ramPrice"),
+                        $("#interconnectPrice"), $("#dspPrice"),
+                        $("#sensorPrice"));
+
+            // get user name
 			$.ajax({
-				url : "name",
-				success : function(msg) {
+				url: "name",
+				success: function(msg) {
 					$("#humanname").append(msg);
 				}
 			});
-		$("#propose").click(function() {
-			// nothing yet
-		});
+
+            // get time
+            $.ajax({
+                url: "time",
+                success: function(msg) {
+                    $("#time").append(msg);
+                }
+            });
+
+            // get offer, parse it and modify elements
+            $.ajax({
+                url: "offer",
+                success: function(msg) {
+                    msgList = msg.split(" ");
+					for (i = 0;i < 5;i++) {
+						prices[i].empty();
+						prices[i].append(msgList[i]);
+					}
+                }
+            });
+
+            // button click functions
+			// TODO
+            $("#accept").click(function() {
+            });
+
+            $("#propose").click(function() {
+            });
+
+            $("#end-round").click(function() {
+            });
+
+            $("#opt-out").click(function() {
+            });
 
 		});
 	</script>
@@ -40,15 +72,7 @@
 	<body>
 		<h1>SiAgent</h1>
 		<p>Human negotiator: <b id="humanname"></b></p>
-
-		<div id="chatbox">
-			<h4>History of decisions:</h4>
-			<table class="grid ui-state-highlight ui-corner-all">
-			<tr><td><b>Human</b>:</td><td>A decision</td></tr>
-			<tr><td><b>Computer</b>:</td><td>Another decision<td></tr>
-			<tr><td><b>Dunno</b>:</td><td>...</td></tr>
-			</table>
-		</div>
+        <p>Current time: <b id="time"></b></p>
 
 		<div id="controls">
 			<h4>Offers:</h4>
@@ -88,5 +112,15 @@
 				<input type="button" id="opt-out" value="Opt out" />
 			</p>
 		</div>
+
+		<div id="chatbox">
+			<h4>History of decisions:</h4>
+			<table class="grid ui-state-highlight ui-corner-all">
+			<tr><td><b>Human</b>:</td><td>A decision</td></tr>
+			<tr><td><b>Computer</b>:</td><td>Another decision<td></tr>
+			<tr><td><b>Dunno</b>:</td><td>...</td></tr>
+			</table>
+		</div>
+
 	</body>
 </html>
