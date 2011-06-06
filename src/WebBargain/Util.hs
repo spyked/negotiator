@@ -1,12 +1,17 @@
 module WebBargain.Util where
 
 import Happstack.Server (asContentType, serveFile, notFound,
-                        ServerPart, Response)
+                        ServerPart, Response, expireCookie, BodyPolicy,
+                        defaultBodyPolicy)
 import System.FilePath ((</>))
 
 -- site directory
 siteDir :: String
 siteDir = "site"
+
+-- default policy for post requests
+postPolicy :: BodyPolicy
+postPolicy = defaultBodyPolicy "/tmp/" 0 1024 1024
 
 -- content types
 htmlContent :: Monad m => FilePath -> m String
@@ -28,3 +33,12 @@ serve404 = serveFile htmlContent (siteDir </> "404.html") >>= notFound
 -- served when the negotiation session isn't initialized
 serveNoSession :: ServerPart Response
 serveNoSession = serveFile htmlContent $ siteDir </> "nosession.html"
+
+-- called when session ends
+expireAllCookies :: ServerPart ()
+expireAllCookies = do
+    expireCookie "username"
+    expireCookie "offer"
+    expireCookie "state"
+
+

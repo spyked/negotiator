@@ -1,8 +1,14 @@
 module WebBargain.State where
 
-import Debug.Trace
 import Negotiator.Negotiation
 import Negotiator.Agent
+import Negotiator.SiAgent (SiOffer, mkSiAgent)
+
+type SiState = WebState SiOffer
+
+-- SiAgent alias
+initialSiAgent :: QOAgent SiOffer
+initialSiAgent = mkSiAgent
 
 data Offer o => WebState o = WebState {
     wsNegotiation :: Negotiation o,
@@ -33,3 +39,6 @@ wsQOAgent (QOAgent ss thr me _ advs) (WebState _ oppID probs) =
         Nothing -> head agTypes -- not really ok
     advs' = zipWith (\ (ag,_) p -> (ag,p) ) advs probs -- update ps
 
+mkWebState :: Offer o => Negotiation o -> QOAgent o -> WebState o
+mkWebState neg (QOAgent _ _ _ opp advs) = 
+    WebState neg (agentID opp) (map snd advs)

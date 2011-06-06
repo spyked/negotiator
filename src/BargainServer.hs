@@ -29,6 +29,7 @@ main = simpleHTTP nullConf $ msum
         dir "offer" $ serveOffer,
         dir "time" $ serveTime,
         dir "messages" $ negotiationProtocol,
+        dir "silent-end" $ expireAllCookies >> (ok . toResponse) "done",
         dir "index" $ serveFile htmlContent (siteDir </> "index.html"),
         nullDir >> serveFile htmlContent (siteDir </> "index.html"),
         spinButtonData,

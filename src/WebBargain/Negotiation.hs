@@ -3,21 +3,16 @@ module WebBargain.Negotiation
     negotiationProtocol) where
 
 import Control.Monad
-import Control.Monad.Trans (liftIO)
 import Happstack.Server
 import System.FilePath ((</>))
 import WebBargain.State
+import WebBargain.Protocol
 import WebBargain.Util
 import Negotiator.Negotiation
 import Negotiator.Agent
 import Negotiator.SiAgent
 
-type SiState = WebState SiOffer
-
 -- initialization parameters
-initialSiAgent :: QOAgent SiOffer
-initialSiAgent = mkSiAgent
-
 initialNegotiation :: Negotiation SiOffer
 initialNegotiation = Negotiation {
     negDecision     = Initiate,
@@ -63,16 +58,12 @@ negotiationSession = msum
     ]
     where
     serveSession = serveFile htmlContent (siteDir </> "session.html")
-    postPolicy = defaultBodyPolicy "/tmp/" 0 1024 1024
 
 -- serve the current offer of the automated negotiator
 serveOffer :: ServerPart Response
-serveOffer = msum
-    [
-        do offer <- lookCookieValue "offer"
-           ok . toResponse $ offer
-    ,   do ok $ toResponse "no_offer"
-    ]
+serveOffer = do 
+    offer <- lookCookieValue "offer"
+    ok . toResponse $ offer
 
 -- serve the current negotiation round
 serveTime :: ServerPart Response
@@ -80,9 +71,16 @@ serveTime = msum
     [
         do state <- readCookieValue "state" :: ServerPartT IO SiState
            ok . toResponse . show $ negTime $ wsNegotiation state
-    ,   do ok $ toResponse "-1"
+    ,   do ok $ toResponse "-42"
     ]
 
+-- handle protocol requests from the client part
 negotiationProtocol :: ServerPart Response
-negotiationProtocol = serve404 -- not defined yet
+negotiationProtocol = msum
+    [
+        dir "accept" $ protocolAccept,
+        dir "propose" $ protocolPropose,
+        dir "end-round" $ protocolEndSession,
+        dir "opt-out" $ protocolOptOut
+    ]
 

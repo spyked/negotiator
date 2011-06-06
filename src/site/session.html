@@ -12,6 +12,7 @@
 
 	<script>
 		$(document).ready(function() {
+			// declarations
 			$("#siCpu").spinner({min:0, max:16});
 			$("#siRam").spinner({min:0, max:14});
 			$("#siInterconnect").spinner({min:0, max:25});
@@ -20,6 +21,77 @@
             prices = new Array($("#cpuPrice"), $("#ramPrice"),
                         $("#interconnectPrice"), $("#dspPrice"),
                         $("#sensorPrice"));
+			buttons = new Array($("#accept"), $("#propose"),
+						$("#end-round"), $("#opt-out"));
+
+			// function definitions
+			function updatePriceList(msgList) {
+				for (i = 0;i < 5;i++) {
+					prices[i].empty();
+					prices[i].append(msgList[i]);
+				}
+			}
+
+			function initPrices() {
+				$.ajax({
+					url: "offer",
+					success: function(msg) {
+						// add history message
+						$("#historytable").append(
+							"<tr><td>0</td><td><b>Game</b></td>" +
+							"<td>Negotiation initiated with offer " +
+							msg + ".</td></tr>");
+
+						// update price list
+						msgList = msg.split(" ");
+						updatePriceList(msgList);
+					}
+				});
+			}
+
+			function updatePrices() {
+				// get offer, parse it and modify elements
+				$.ajax({
+					url: "offer",
+					success: function(msg) {
+						msgList = msg.split(" ");
+						updatePriceList(msgList);
+					}
+				});
+			}
+
+			function disableButtons() {
+				for (i = 0;i < 4;i++)
+					buttons[i].attr('disabled','disabled');
+			}
+
+			function enableButtons() {
+				for (i = 0;i < 4;i++)
+					buttons[i].removeAttr('disabled');
+			}
+
+			function getUserOffer() {
+				ret = "";
+
+				ret += $("#siCpu").val() + " ";
+				ret += $("#siRam").val() + " ";
+				ret += $("#siInterconnect").val() + " ";
+				ret += $("#siDsp").val() + " ";
+				ret += $("#siSensor").val();
+
+				return ret;
+			}
+
+			function updateTime() {
+				// get time
+				$.ajax({
+					url: "time",
+					success: function(msg) {
+						$("#time").empty();
+						$("#time").append(msg);
+					}
+				});
+			}
 
             // get user name
 			$.ajax({
@@ -29,38 +101,69 @@
 				}
 			});
 
-            // get time
-            $.ajax({
-                url: "time",
-                success: function(msg) {
-                    $("#time").append(msg);
-                }
-            });
-
-            // get offer, parse it and modify elements
-            $.ajax({
-                url: "offer",
-                success: function(msg) {
-                    msgList = msg.split(" ");
-					for (i = 0;i < 5;i++) {
-						prices[i].empty();
-						prices[i].append(msgList[i]);
-					}
-                }
-            });
+			// update other variables
+			initPrices();
+			updateTime();
 
             // button click functions
-			// TODO
             $("#accept").click(function() {
+				disableButtons();
+
+				$.ajax({
+					url: "messages/accept",
+					success: function(msg) {
+						$("#historytable").append(msg);		
+					}
+				});
             });
 
             $("#propose").click(function() {
+				disableButtons();
+				o = getUserOffer();
+
+				$.ajax({
+					url: "messages/propose",
+					type: "POST",
+					data: ({proposal : o}),
+					success: function(msg) {
+						run = msg.substr(0,1);
+						rest = msg.substr(1);
+
+						// update history table and offer
+						$("#historytable").append(rest);
+						updatePrices();
+						updateTime();
+
+						// check if we need to stop
+						if (run == "s") {
+							$.ajax({
+								url: "silent-end",
+								success: function(msg) {
+									// this function intentionally left
+									// blank.
+								}
+							});
+						} else {
+							enableButtons();
+						}
+					}
+				});
             });
 
+			// TODO
             $("#end-round").click(function() {
+				disableButtons();
             });
 
             $("#opt-out").click(function() {
+				disableButtons();
+
+				$.ajax({
+					url: "messages/opt-out",
+					success: function(msg) {
+						$("#historytable").append(msg);
+					}
+				});
             });
 
 		});
@@ -76,12 +179,15 @@
 
 		<div id="controls">
 			<h4>Offers:</h4>
-			<table class="grid ui-state-highlight ui-corner-all">
+			<table class="grid ui-state-highlight">
+			<thead>
 			<tr>
 				<td>Component</td>
 				<td>Current price</td>
 				<td>Proposed price</td>
 			</tr><tr>
+			</thead>
+			<tbody>
 				<td><b>CPU</b></td>
 				<td><div id="cpuPrice">0</div></td>
 				<td><input type="text" size="4" id="siCpu" value="16"/></td>
@@ -103,6 +209,7 @@
 				<td><div id="sensorPrice">0</div></td>
 				<td><input type="text" size="4" id="siSensor" value="6"/></td>
 			</tr> 
+			</tbody>
 			</table>
 
 			<p>
@@ -115,10 +222,12 @@
 
 		<div id="chatbox">
 			<h4>History of decisions:</h4>
-			<table class="grid ui-state-highlight ui-corner-all">
-			<tr><td><b>Human</b>:</td><td>A decision</td></tr>
-			<tr><td><b>Computer</b>:</td><td>Another decision<td></tr>
-			<tr><td><b>Dunno</b>:</td><td>...</td></tr>
+			<table class="grid ui-state-highlight">
+			<thead>
+			<tr><td>Time</td><td>Player</td><td><td>Decision</td></tr>
+			</thead>
+			<tbody id="historytable">
+			</tbody>
 			</table>
 		</div>
 
