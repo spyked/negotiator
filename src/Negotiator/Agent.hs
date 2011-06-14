@@ -87,7 +87,8 @@ agentDecide ag@(QOAgent subSet thresh a b _) neg
         | abs (uB o_opp - uB o_q) <= thresh = return $ Propose o_q
         | otherwise = do -- speculate
         p <- randomRIO (0,1)
-        let r = (rA o_opp + rB o_opp) * 0.5
+        --let r = (rA o_opp + rB o_opp) * 0.5
+        let r = rA o_opp
         putStrLn $ "rank iz: " ++ show r
         return $ if p <= r then Accept else Propose o_q
 

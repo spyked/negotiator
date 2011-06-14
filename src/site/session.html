@@ -150,9 +150,35 @@
 				});
             });
 
-			// TODO
             $("#end-round").click(function() {
 				disableButtons();
+				o = getUserOffer();
+
+				$.ajax({
+					url: "messages/end-round",
+					success: function(msg) {
+						run = msg.substr(0,1);
+						rest = msg.substr(1);
+
+						// update history table and offer
+						$("#historytable").append(rest);
+						updatePrices();
+						updateTime();
+
+						// check if we need to stop
+						if (run == "s") {
+							$.ajax({
+								url: "silent-end",
+								success: function(msg) {
+									// nothing here
+								}
+							});
+						} else {
+							enableButtons();
+						}
+					}
+				});
+
             });
 
             $("#opt-out").click(function() {
