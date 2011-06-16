@@ -1,4 +1,4 @@
-module Negotiator.SiAgent (mkSiAgent) where
+module Negotiator.SiAgent (SiOffer(..),mkSiAgent) where
 
 import Negotiator.Negotiation
 import Negotiator.Agent
@@ -13,13 +13,6 @@ genericRank :: UtilityFunc -> SiOffer -> [SiOffer] -> Double
 genericRank util = rankOfferBy cmp
     where
     cmp o1 o2 = compare (util o1 0) (util o2 0)
-
-rawAgentTypes :: [UtilityFunc]
-rawAgentTypes = [
-    oppU1,
-    oppU2,
-    oppU3
-    ]
 
 mkAgentModel :: UtilityFunc -> String -> Agent SiOffer
 mkAgentModel util id = Agent id util $ genericRank util
