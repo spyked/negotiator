@@ -2,6 +2,7 @@ module Negotiator.CLI where
 
 import Negotiator.HumanAgent
 import Negotiator.SiAgent
+import Negotiator.SiTFT
 import Negotiator.Negotiation
 import Control.Monad.State
 
@@ -14,7 +15,7 @@ initNegotiation = Negotiation
     Initiate (SiOffer 16 14 25 15 6) 0 0 2 5
 
 cliNegotiation = runStateT negotiation 
-    (initNegotiation, HumanAgent, mkSiAgent) >>= return . fst
+    (initNegotiation, HumanAgent, mkSiTFT) >>= return . fst
 
 moveAgent :: (Negotiator a, Offer o) => a o -> Negotiation o -> 
                                         IO (Decision o, a o)

@@ -55,7 +55,7 @@ tftDecide ag neg
         Propose smth -> smth
         _ -> negSQO neg
 
-    -- dice roll: a 20-sided dice
+    -- dice roll: a 20-sided die
     rollDice = do
         p <- randomRIO (0,1) :: IO Double
         if p < 0.05
@@ -67,5 +67,5 @@ tftUpdate ag _ = return ag
 
 -- some constants
 tftThresh :: Double
-tftThresh = 0.33
+tftThresh = 0.4
 

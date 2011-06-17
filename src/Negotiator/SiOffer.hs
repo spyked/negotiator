@@ -42,6 +42,9 @@ instance Offer SiOffer where
 limits :: [Int]
 limits = [16,14,25,15,6]
 
+maxSi :: SiOffer
+maxSi = SiOffer 16 14 25 15 6
+
 -- utility functions
 offerToV5 :: SiOffer -> Vector5
 offerToV5 (SiOffer c r i d s) = Vector5 (

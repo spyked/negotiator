@@ -29,3 +29,12 @@ v5dotp x y = x1 * y1 + x2 * y2 + x3 * y3 + x4 * y4 + x5 * y5
     (x1,x2,x3,x4,x5) = unwrap x
     (y1,y2,y3,y4,y5) = unwrap y
 
+-- apply a function on the (i + 1)th element of a list
+applyOnIndex :: Int -> (a -> a) -> [a] -> [a]
+applyOnIndex i f xs 
+    | i < 0 || i >= length xs = error "index out of bounds"
+    | otherwise = left ++ f x : right
+    where
+    left = take i xs
+    (x : right) = drop i xs
+
