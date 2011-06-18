@@ -8,6 +8,7 @@ import System.FilePath ((</>))
 import WebBargain.State
 import WebBargain.Protocol
 import WebBargain.Util
+import WebBargain.Logger
 import Negotiator.Negotiation
 import Negotiator.Agent
 import Negotiator.SiAgent

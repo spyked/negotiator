@@ -1,6 +1,7 @@
-module WebBargain.Logger (makeLog, appendLog, makeLogEntry) where
+module WebBargain.Logger 
+    (makeLog, appendLog, makeLogEntry, readLog) where
 
-import System.IO (openTempFile, appendFile, hClose)
+import System.IO (openTempFile, appendFile, readFile, hClose)
 import System.Locale (defaultTimeLocale)
 import Data.Time.LocalTime (getZonedTime)
 import Data.Time.Format (formatTime)
@@ -58,6 +59,11 @@ makeLogEntry state@(TFTState neg) = do
         _ -> negSQO neg
     ua = tftuA initialTFTAgent o
     ub = tftuB initialTFTAgent o
+
+readLog :: FilePath -> IO Log
+readLog path = do
+    contents <- readFile path
+    return $ map read $ lines contents
 
 -- path where log is supposed to be saved
 logDir :: FilePath
