@@ -20,13 +20,10 @@ instance Negotiator TFTAgent where
 
 -- self and opponent utilities
 tftuA :: Offer o => TFTAgent o -> o -> Double
-tftuA ag offer = tftRawUtility ag offer / tftRawMax ag
+tftuA ag offer = tftRawUtility ag offer
 
 tftuB :: Offer o => TFTAgent o -> o -> Double
-tftuB ag offer = (max - raw) / max
-    where
-    max = tftRawMax ag
-    raw = tftRawUtility ag offer
+tftuB ag offer = tftRawMax ag - tftRawUtility ag offer
 
 -- Negotiator implementations
 tftOffer :: Offer o => TFTAgent o -> Negotiation o -> IO o
@@ -34,7 +31,7 @@ tftOffer ag neg
     | uA o < tftThresh = tftComplement ag o
     | otherwise = tftRaise ag o
     where
-    uA = tftuA ag
+    uA offer = tftuA ag offer / tftRawMax ag
     o = case negDecision neg of
         Propose smth -> smth
         _ -> negSQO neg
@@ -53,7 +50,7 @@ tftDecide ag neg
     -- variables
     t = negTime neg
     maxt = negDeadline neg
-    uA = tftuA ag
+    uA offer = tftuA ag offer / tftRawMax ag
     o = case negDecision neg of
         Propose smth -> smth
         _ -> negSQO neg
