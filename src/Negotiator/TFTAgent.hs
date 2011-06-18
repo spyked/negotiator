@@ -41,7 +41,10 @@ tftOffer ag neg
 
 tftDecide :: Offer o => TFTAgent o -> Negotiation o -> IO (Decision o)
 tftDecide ag neg 
-    | t == maxt - 1 && uA o >= uA (negSQO neg) = return Accept
+    | uA o >= acceptanceThresh = return Accept
+    | t == maxt - 1 = if uA o >= tftThresh 
+        then return Accept
+        else return OptOut
     | negDecision neg == OptOut = return OptOut
     | negDecision neg == EndSession = return EndSession
     | uA o < tftThresh = tftOffer ag neg >>= return . Propose
@@ -69,3 +72,5 @@ tftUpdate ag _ = return ag
 tftThresh :: Double
 tftThresh = 0.4
 
+acceptanceThresh :: Double
+acceptanceThresh = 0.95

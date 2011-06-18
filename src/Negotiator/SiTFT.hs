@@ -1,4 +1,4 @@
-module Negotiator.SiTFT (mkSiTFT) where
+module Negotiator.SiTFT (TFTAgent(..),mkSiTFT) where
 
 -- tit-for-tat implementation for SiOffer
 import System.Random (randomRIO)
