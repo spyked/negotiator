@@ -44,55 +44,108 @@ protocolEndNegotiation d = do
         render = renderHistoryLine time name d
     ok . toResponse $ render
 
--- generic negotiation decision
+{- generic negotiation decisions -}
+-- negotiation time has expired
+decideDeadline :: Decision SiOffer -> String -> SiState 
+                                             -> ServerPart Response
+decideDeadline d humanRender state = do
+    let agent = wsQOAgent initialSiAgent state
+        state' = case state of
+           QOState _ _ _ -> mkQOState acceptNeg $ 
+                            wsQOAgent initialSiAgent state
+           TFTState _ -> mkTFTState acceptNeg initialTFTAgent
+        render = humanRender ++ renderSQO t "Computer"
+    addCookie Session (mkCookie "offer" $ show sqo)
+    addCookie Session (mkCookie "state" $ show state')
+    ok . toResponse $ "s" ++ render -- s for "stopped"
+    where
+    neg@(Negotiation _ sqo n t mn mt) = wsNegotiation state
+    acceptNeg = Negotiation Accept sqo n t mn mt
+
+-- negotiation running
+-- TODO: lots of duplicate code here, find some way to merge
+decideRun :: Decision SiOffer -> String -> SiState
+                                        -> ServerPart Response
+
+-- human has decided to end session
+decideRun EndSession humanRender state@(QOState _ _ _) = do
+    let agent = wsQOAgent initialSiAgent state
+        state' = mkQOState (Negotiation EndSession sqo n t' mn mt) agent
+        render = humanRender
+    offer <- liftIO $ genOffer agent neg'
+    addCookie Session (mkCookie "offer" $ show offer)
+    addCookie Session (mkCookie "state" $ show state')
+    ok . toResponse $ "r" ++ render -- r for "running"
+    where 
+    neg@(Negotiation _ sqo n t mn mt) = wsNegotiation state
+    neg' = Negotiation EndSession sqo n t mn mt
+    t' = t + 1
+decideRun EndSession humanRender state@(TFTState _) = do
+    let agent = initialTFTAgent
+        state' = mkTFTState (Negotiation EndSession sqo n t' mn mt) agent
+        render = humanRender
+    offer <- liftIO $ genOffer agent neg'
+    addCookie Session (mkCookie "offer" $ show offer)
+    addCookie Session (mkCookie "state" $ show state')
+    ok . toResponse $ "r" ++ render -- r for "running"
+    where 
+    neg@(Negotiation _ sqo n t mn mt) = wsNegotiation state
+    neg' = Negotiation EndSession sqo n t mn mt
+    t' = t + 1
+
+-- human has proposed an offer
+decideRun (Propose offer) humanRender state@(QOState _ _ _) = do
+    let agent = wsQOAgent initialSiAgent state
+    d' <- liftIO $ decide agent neg'
+    agent' <- liftIO $ update agent neg'
+    let state' = mkQOState (Negotiation d' sqo n t' mn mt) agent'
+        render = humanRender ++ renderHistoryLine t "Computer" d'
+        run = if d' == Accept then "s" else "r"
+        offer' = case d' of
+            Accept -> offer
+            Propose o -> o
+            _ -> sqo -- this should never match
+    addCookie Session (mkCookie "offer" $ show offer')
+    addCookie Session (mkCookie "state" $ show state')
+    ok . toResponse $ run ++ render
+    where 
+    neg@(Negotiation _ sqo n t mn mt) = wsNegotiation state
+    neg' = Negotiation (Propose offer) sqo n t mn mt
+    t' = t + 1
+decideRun (Propose offer) humanRender state@(TFTState _) = do
+    let agent = initialTFTAgent
+    d' <- liftIO $ decide agent neg'
+    agent' <- liftIO $ update agent neg'
+    let state' = mkTFTState (Negotiation d' sqo n t' mn mt) agent'
+        render = humanRender ++ renderHistoryLine t "Computer" d'
+        run = if d' == Accept then "s" else "r"
+        offer' = case d' of
+            Accept -> offer
+            Propose o -> o
+            _ -> sqo -- this should never match
+    addCookie Session (mkCookie "offer" $ show offer')
+    addCookie Session (mkCookie "state" $ show state')
+    ok . toResponse $ run ++ render
+    where 
+    neg@(Negotiation _ sqo n t mn mt) = wsNegotiation state
+    neg' = Negotiation (Propose offer) sqo n t mn mt
+    t' = t + 1
+
+-- something's not right if we get here
+decideRun _ _ _ = error "bad match" 
+
+-- main decision server part
 protocolDecide :: Decision SiOffer -> ServerPart Response
 protocolDecide d = do
     name <- lookCookieValue "username"
     state <- readCookieValue "state" :: ServerPartT IO SiState
-    let agent = wsQOAgent initialSiAgent state
-        neg@(Negotiation _ sqo n t mn mt) = wsNegotiation state
+    let neg@(Negotiation _ sqo n t mn mt) = wsNegotiation state
         neg' = Negotiation d sqo n t mn mt
         humanRender = renderHistoryLine t name d
         t' = t + 1
     if t == mt
-        -- negotiation time has expired
-        then do
-        let state' = mkQOState (Negotiation Accept sqo n t mn mt) agent
-            render = humanRender ++ renderSQO t "Computer"
-        addCookie Session (mkCookie "offer" $ show sqo)
-        addCookie Session (mkCookie "state" $ show state')
-        ok . toResponse $ "s" ++ render -- s for "stopped"
-
-        -- negotiation running
-        else case d of
-            -- human has decided to end session
-            EndSession -> do
-                let state' = mkQOState (Negotiation d sqo n t' mn mt) 
-                             agent
-                    render = humanRender
-                offer <- liftIO $ genOffer agent neg'
-                addCookie Session (mkCookie "offer" $ show offer)
-                addCookie Session (mkCookie "state" $ show state')
-                ok . toResponse $ "r" ++ render -- r for "running"
-
-            -- human has proposed an offer
-            Propose offer -> do
-                d' <- liftIO $ decide agent neg'
-                agent' <- liftIO $ update agent neg'
-                let state' = mkQOState (Negotiation d' sqo n t' mn mt) 
-                             agent'
-                    render = humanRender ++ 
-                             renderHistoryLine t "Computer" d'
-                    run = if d' == Accept then "s" else "r"
-                    offer' = case d' of
-                        Accept -> offer
-                        Propose o -> o
-                        _ -> sqo -- this should never match
-                addCookie Session (mkCookie "offer" $ show offer')
-                addCookie Session (mkCookie "state" $ show state')
-                ok . toResponse $ run ++ render
-
-            _ -> error "Bad match"
+        then decideDeadline d humanRender state
+        else decideRun d humanRender state
 
 -- some useful html rendering functions
 renderHistoryLine :: Offer o => Time -> String -> Decision o -> String

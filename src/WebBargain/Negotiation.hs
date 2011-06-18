@@ -1,4 +1,4 @@
-module WebBargain.Negotiation 
+module WebBargain.Negotiation
     (negotiationSession, serveOffer, serveHumanName, serveTime,
     negotiationProtocol) where
 
@@ -11,6 +11,7 @@ import WebBargain.Util
 import Negotiator.Negotiation
 import Negotiator.Agent
 import Negotiator.SiAgent
+import Negotiator.SiTFT
 
 -- initialization parameters
 initialNegotiation :: Negotiation SiOffer
@@ -30,6 +31,11 @@ initialQOState = QOState {
     wsProbabilities = map snd . possibleAdversaries $ initialSiAgent
     }
 
+initialTFTState :: SiState
+initialTFTState = TFTState {
+    wsNegotiation = initialNegotiation
+    }
+
 -- serve nickname 
 serveHumanName :: ServerPart Response
 serveHumanName = do
@@ -43,10 +49,15 @@ negotiationSession = msum
         do methodM POST
            decodeBody postPolicy
            username <- look "username"
+           agent <- look "agent"
            let offer = negSQO initialNegotiation
+               initialState = case agent of
+                    "siagent" -> initialQOState
+                    "tftagent" -> initialTFTState
+                    _ -> initialQOState
            addCookie Session (mkCookie "username" username)
            addCookie Session (mkCookie "offer" $ show offer)
-           addCookie Session (mkCookie "state" $ show initialQOState)
+           addCookie Session (mkCookie "state" $ show initialState)
            serveSession
            -- if method is POST, create a new session with
            -- the specified data.
