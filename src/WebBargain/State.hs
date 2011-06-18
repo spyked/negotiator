@@ -10,27 +10,33 @@ type SiState = WebState SiOffer
 initialSiAgent :: QOAgent SiOffer
 initialSiAgent = mkSiAgent
 
-data Offer o => WebState o = WebState {
+data Offer o => WebState o = QOState {
     wsNegotiation :: Negotiation o,
     wsOpponentID :: String,
     wsProbabilities :: [Double]
     }
 
 instance Offer o => Show (WebState o) where
-    show (WebState n o p) = "(" ++ show n ++ "," ++ o ++ "," 
+    show (QOState n o p) = "QO (" ++ show n ++ "," ++ o ++ "," 
                          ++ show p ++ ")"
 
 instance Offer o => Read (WebState o) where
-    readsPrec _ = readParen True 
-        (\ inp -> [(WebState n o p, r) | 
-                    (n, ',' : r') <- reads inp,
-                    (o, ',' : r'') <- lex r',
-                    (p, r) <- reads r'' ]
-        )
+    readsPrec _ str = case lex str of
+        [("QO",rest)] -> readParen True 
+            (\ inp -> [(QOState n o p, r) | 
+                        (n, ',' : r') <- reads inp,
+                        (o, ',' : r'') <- lex r',
+                        (p, r) <- reads r'' ]
+            ) rest
+        _ -> error "no parse"
+
+isQOState :: Offer o => WebState o -> Bool
+isQOState (QOState _ _ _) = True
+isQOState _ = False
 
 -- gets a stateful wsQOAgent from the initial one plus a WebState
 wsQOAgent :: Offer o => QOAgent o -> WebState o -> QOAgent o
-wsQOAgent (QOAgent ss thr me _ advs) (WebState _ oppID probs) = 
+wsQOAgent (QOAgent ss thr me _ advs) (QOState _ oppID probs) = 
     QOAgent ss thr me opp' advs'
     where
     agTypes = map fst advs
@@ -39,6 +45,6 @@ wsQOAgent (QOAgent ss thr me _ advs) (WebState _ oppID probs) =
         Nothing -> head agTypes -- not really ok
     advs' = zipWith (\ (ag,_) p -> (ag,p) ) advs probs -- update ps
 
-mkWebState :: Offer o => Negotiation o -> QOAgent o -> WebState o
-mkWebState neg (QOAgent _ _ _ opp advs) = 
-    WebState neg (agentID opp) (map snd advs)
+mkQOState :: Offer o => Negotiation o -> QOAgent o -> WebState o
+mkQOState neg (QOAgent _ _ _ opp advs) = 
+    QOState neg (agentID opp) (map snd advs)

@@ -23,8 +23,8 @@ initialNegotiation = Negotiation {
     negDeadline     = 5
     }
 
-initialState :: SiState
-initialState = WebState {
+initialQOState :: SiState
+initialQOState = QOState {
     wsNegotiation   = initialNegotiation,
     wsOpponentID    = agentID . opponent $ initialSiAgent,
     wsProbabilities = map snd . possibleAdversaries $ initialSiAgent
@@ -46,7 +46,7 @@ negotiationSession = msum
            let offer = negSQO initialNegotiation
            addCookie Session (mkCookie "username" username)
            addCookie Session (mkCookie "offer" $ show offer)
-           addCookie Session (mkCookie "state" $ show initialState)
+           addCookie Session (mkCookie "state" $ show initialQOState)
            serveSession
            -- if method is POST, create a new session with
            -- the specified data.

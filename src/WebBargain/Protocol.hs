@@ -57,7 +57,7 @@ protocolDecide d = do
     if t == mt
         -- negotiation time has expired
         then do
-        let state' = mkWebState (Negotiation Accept sqo n t mn mt) agent
+        let state' = mkQOState (Negotiation Accept sqo n t mn mt) agent
             render = humanRender ++ renderSQO t "Computer"
         addCookie Session (mkCookie "offer" $ show sqo)
         addCookie Session (mkCookie "state" $ show state')
@@ -67,7 +67,7 @@ protocolDecide d = do
         else case d of
             -- human has decided to end session
             EndSession -> do
-                let state' = mkWebState (Negotiation d sqo n t' mn mt) 
+                let state' = mkQOState (Negotiation d sqo n t' mn mt) 
                              agent
                     render = humanRender
                 offer <- liftIO $ genOffer agent neg'
@@ -79,7 +79,7 @@ protocolDecide d = do
             Propose offer -> do
                 d' <- liftIO $ decide agent neg'
                 agent' <- liftIO $ update agent neg'
-                let state' = mkWebState (Negotiation d' sqo n t' mn mt) 
+                let state' = mkQOState (Negotiation d' sqo n t' mn mt) 
                              agent'
                     render = humanRender ++ 
                              renderHistoryLine t "Computer" d'
