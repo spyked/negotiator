@@ -3,6 +3,7 @@ module WebBargain.Negotiation
     negotiationProtocol) where
 
 import Control.Monad
+import Control.Monad.Trans (liftIO)
 import Happstack.Server
 import System.FilePath ((</>))
 import WebBargain.State
@@ -56,9 +57,18 @@ negotiationSession = msum
                     "siagent" -> initialQOState
                     "tftagent" -> initialTFTState
                     _ -> initialQOState
+           -- we have cookies
            addCookie Session (mkCookie "username" username)
            addCookie Session (mkCookie "offer" $ show offer)
            addCookie Session (mkCookie "state" $ show initialState)
+
+           -- side effect: create file with log data and save path
+           -- in a cookie.
+           logfile <- liftIO $ makeLog username
+           liftIO $ makeLogEntry initialState >>= appendLog logfile
+           addCookie Session (mkCookie "logfile" logfile)
+
+           -- serve new session
            serveSession
            -- if method is POST, create a new session with
            -- the specified data.
