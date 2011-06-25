@@ -19,7 +19,7 @@ import Negotiator.SiTFT
 initialNegotiation :: Negotiation SiOffer
 initialNegotiation = Negotiation {
     negDecision     = Initiate,
-    negSQO          = SiOffer 16 14 25 15 6,
+    negSQO          = SiOffer 10 7 15 10 4, -- 16 14 25 15 6
     negNumber       = 0,
     negTime         = 0,
     negMaxNumber    = 2,

@@ -89,7 +89,7 @@ agentDecide ag@(QOAgent subSet thresh a b _) neg
         p <- randomRIO (0,1)
         --let r = (rA o_opp + rB o_opp) * 0.5
         let r = rA o_opp
-        putStrLn $ "rank iz: " ++ show r
+        putStrLn $ "rank iz: " ++ show r ++ ", p iz: " ++ show p
         return $ if p <= r then Accept else Propose o_q
 
 luce :: Offer o => o -> [o] -> Agent o -> Double
