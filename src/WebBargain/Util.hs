@@ -40,5 +40,6 @@ expireAllCookies = do
     expireCookie "username"
     expireCookie "offer"
     expireCookie "state"
+    expireCookie "logfile"
 
 

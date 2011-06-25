@@ -67,6 +67,7 @@ mkTFTState :: Offer o => Negotiation o -> TFTAgent o -> WebState o
 mkTFTState neg _ = TFTState neg
 
 stateFromNegotiation :: Offer o => Negotiation o -> WebState o -> WebState o
-stateFromNegotiation neg' (QOState neg oppID probs) = 
+stateFromNegotiation neg' (QOState _ oppID probs) = 
     QOState neg' oppID probs
-stateFromDecision neg' (TFTState neg) = TFTState neg'
+stateFromNegotiation neg' (TFTState _) = TFTState neg'
+

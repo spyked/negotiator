@@ -40,8 +40,14 @@ protocolEndNegotiation d = do
     name <- lookCookieValue "username"
     state <- readCookieValue "state" :: ServerPartT IO SiState
     logfile <- lookCookieValue "logfile"
+    let neg@(Negotiation prevd sqo n t mn mt) = wsNegotiation state
+        sqo' = case prevd of
+            Propose offer -> if d == Accept then offer else sqo
+            _ -> sqo
+        neg' = Negotiation d sqo' n t mn mt
+        state' = stateFromNegotiation neg' state
     -- append to log
-    liftIO $ makeLogEntry state >>= appendLog logfile
+    liftIO $ makeLogEntry state' >>= appendLog logfile
     -- negotiation is over - expire all cookies
     expireAllCookies
     let time = negTime . wsNegotiation $ state
