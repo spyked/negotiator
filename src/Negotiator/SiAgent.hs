@@ -38,5 +38,5 @@ mkSiAgent =
 
 -- fraction of the total offer set to include in search
 setPercentage :: Double
-setPercentage = 10
+setPercentage = 12
 

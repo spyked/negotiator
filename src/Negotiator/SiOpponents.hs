@@ -63,19 +63,19 @@ oppU3 o t = maxU - v5dotp weights values - 0.5 * (fromIntegral t)
 
 -- some more opponent utilities
 a0U :: UtilityFunc
-a0U o t = maxU - v5dotp a0Weights (offerToV5 o) - 2 * (fromIntegral t)
+a0U o t = maxU - v5dotp a0Weights (offerToV5 o) + 1.7 * (fromIntegral t)
 
 a1U :: UtilityFunc
-a1U o t = maxU - v5dotp a1Weights (offerToV5 o) - 2 * (fromIntegral t)
+a1U o t = maxU - v5dotp a1Weights (offerToV5 o) + 1.7 * (fromIntegral t)
 
 a2U :: UtilityFunc
-a2U o t = maxU - v5dotp a2Weights (offerToV5 o) - 2 * (fromIntegral t)
+a2U o t = maxU - v5dotp a2Weights (offerToV5 o) + 1.7 * (fromIntegral t)
 
 a3U :: UtilityFunc
-a3U o t = maxU - v5dotp a3Weights (offerToV5 o) - 2 * (fromIntegral t)
+a3U o t = maxU - v5dotp a3Weights (offerToV5 o) + 1.7 * (fromIntegral t)
 
 a4U :: UtilityFunc
-a4U o t = maxU - v5dotp a4Weights (offerToV5 o) - 2 * (fromIntegral t)
+a4U o t = maxU - v5dotp a4Weights (offerToV5 o) + 1.7 * (fromIntegral t)
 
 a0Weights = Vector5 (1 / 16, 1 / 14, 23 / 25, 7 / 15, 3 / 6)
 a1Weights = Vector5 (14 / 16, 11 / 14, 12 / 25, 0.5 / 15, 0.1 / 6)
