@@ -38,7 +38,7 @@ instance Offer SiOffer where
         where
         [lc,lr,li,ld,ls] = limits
 
--- offer limits: all offers are multiples of $100.
+-- offer limits: all offers are multiples of some sum. or not.
 limits :: [Int]
 limits = [16,14,25,15,6]
 

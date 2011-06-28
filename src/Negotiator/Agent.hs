@@ -62,7 +62,7 @@ qo (QOAgent subSet _ a b _) neg = return $ maximumBy cmp $ subSet
     beta o = (luA o + luB o) * uB o t
     minO = uncurry min . (alpha &&& beta)
 
--- Decision strategy - incomplete
+-- Decision strategy
 agentDecide :: Offer o => QOAgent o -> Negotiation o -> IO (Decision o)
 agentDecide ag@(QOAgent subSet thresh a b _) neg 
     | negDecision neg == Accept = return Accept
@@ -98,6 +98,7 @@ luce o subSet a = uA o 0 / sumA
     uA = offerUtility a
     sumA = sum $ map (flip uA $ 0) subSet
 
+-- Belief update
 agentUpdate :: Offer o => QOAgent o -> Negotiation o -> IO (QOAgent o)
 agentUpdate (QOAgent subSet thr a b ags) neg = do
     putStrLn $ "Believed type: " ++ show b'
