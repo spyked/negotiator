@@ -18,7 +18,8 @@ mkSiTFT = TFTAgent {
 siComplement :: SiOffer -> IO SiOffer
 siComplement (SiOffer c r i d s) = return $ SiOffer c' r' i' d' s'
     where
-    [c',r',i',d',s'] = zipWith (-) [17,15,26,16,7] [c,r,i,d,s]
+    [c',r',i',d',s'] = map checkMax $ zip [16,14,25,15,6] $ zipWith (-) [17,15,26,16,7] [c,r,i,d,s]
+    checkMax (max,n) = if n >= max then max else n
 
 -- raised offer
 siRaise :: SiOffer -> IO SiOffer
