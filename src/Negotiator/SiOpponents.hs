@@ -14,7 +14,8 @@ rawAgentTypes = [
     a1U,
     a2U,
     a3U,
-    a4U
+    a4U,
+    a5U
     ]
 
 rawAgentWeights :: [Vector5]
@@ -76,6 +77,9 @@ a3U o t = maxU - v5dotp a3Weights (offerToV5 o) + 1.9 * (fromIntegral t)
 
 a4U :: UtilityFunc
 a4U o t = maxU - v5dotp a4Weights (offerToV5 o) + 1.9 * (fromIntegral t)
+
+a5U :: UtilityFunc
+a5U o t = maxU - v5dotp a5Weights (offerToV5 o) + 1.9 * (fromIntegral t)
 
 a0Weights = Vector5 (1 / 16, 1 / 14, 23 / 25, 7 / 15, 3 / 6)
 a1Weights = Vector5 (14 / 16, 11 / 14, 12 / 25, 0.5 / 15, 0.1 / 6)
