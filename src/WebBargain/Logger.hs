@@ -1,5 +1,5 @@
 module WebBargain.Logger 
-    (LogEntry, makeLog, appendLog, makeLogEntry, readLog) where
+    (Log, LogEntry(..), makeLog, appendLog, makeLogEntry, readLog) where
 
 import System.IO (openTempFile, appendFile, readFile, hClose)
 import System.Locale (defaultTimeLocale)
